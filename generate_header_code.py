@@ -4,7 +4,7 @@ def generate_header_file(input_file):
     output_file = input_file_name + ".h"
     with open(input_file, 'r') as reader:
         lines = reader.readlines()
-    output_string = "#pragma once" + "\n" + "#include \"csr.h\"" + "\n" + "#include \"op.h\"" + "\n" + "extern int THD_COUNT;" + '\n'
+    output_string = "#pragma once" + "\n" + "#include \"csr.h\"" + "\n" + "#include \"op.h\"" + "\n" + '\n'
     for line in lines:
 #         print(count)
         output_string = output_string + line
