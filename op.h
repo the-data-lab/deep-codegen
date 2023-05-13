@@ -109,6 +109,8 @@ template <class T>
 struct array1d_t {
     T* data_ptr;
     int64_t col_count;
+    array1d_t(T* ptr, int64_t col) 
+            : data_ptr(ptr), col_count(col) { }
 };
 
 
@@ -119,6 +121,9 @@ struct array2d_t {
     T* data_ptr;
     int64_t row_count;
     int64_t col_count;
+    array2d_t(T* ptr, int64_t row,  int64_t col) 
+            : data_ptr(ptr), row_count (row),col_count(col) { }
+
 };
 
 //3D tensor
@@ -128,6 +133,8 @@ struct array3d_t {
     int64_t matrix_count;
     int64_t row_count;
     int64_t col_count;
+    array3d_t(T* ptr, int64_t matrix, int64_t row, int64_t col) 
+            : data_ptr(ptr), matrix_count (matrix), row_count (row),col_count(col) { }
 };
 
 
