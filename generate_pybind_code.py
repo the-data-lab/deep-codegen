@@ -1,179 +1,96 @@
+#get function name
 def get_fuc_name(fuc_var):
-    result = fuc_var[0].split(" ")
-    return result[-1]
+    return fuc_var[0].split(" ")[-1]
 
-def fuc_var_class(c):
-    d = c[1].split(",")
-    var_list = []
-    array_dim_list = []
-    array_index_list = []
-#     print("dd",d)
-    for each in d:
-        temp = each.split(" ")
-        var_list.append(temp[-1])
-        array_dim_list.append(temp[:-1])
+#remove empty strings from a list of strings
+def remove_empty_string(string_list):
+    return [item for item in string_list if item != '']
 
-    # remove the "" for array_dim_list
-    for i in range(len(array_dim_list)):
-        temp = array_dim_list[i]
-        temp1 = []
-#         print("temp", temp)
-        for j in range(len(temp)):
-            if temp[j] != "":
-                temp1.append(temp[j])
-        array_dim_list[i] = temp1
-        
-        
-    # remove the "\n" ")" for var_list
-    for i in range(len(var_list)):
-        temp = var_list[i]
-        if "\n" in temp:
-            temp = temp.replace("\n", "")
-        if ")" in temp:
-            temp = temp.replace(")", "")
-        var_list[i] = temp
-        
-    
-    for i in range(len(array_dim_list)):
-        temp = array_dim_list[i]
-        if "array" in temp[0]:
-            array_index_list.append(i)
-        
+#remove unnecessary characters (newline and closing parenthesis) from string
+def remove_unnecessary_chars(string):
+    for char in ['\n', ')']:
+        if char in string:
+            string = string.replace(char, '')
+    return string
 
-        
+#break function info down
+def fuc_var_class(function_info):
+    arguments = function_info[1].split(',')
+    var_list = [remove_unnecessary_chars(item.split(' ')[-1]) for item in arguments]
+    array_dim_list = [remove_empty_string(item.split(' ')[:-1]) for item in arguments]
+    array_index_list = [i for (i, item) in enumerate(array_dim_list) if 'array' in item[0]]
     return var_list, array_dim_list, array_index_list
 
-
+#get dimension of element in `array_dim_list`
 def cal_array_class(array_dim_list, i):
     each_element = array_dim_list[i]
+    for i in range(3):
+        if str(i+1) in each_element[0]:
+            return str(i+1)
+    return "10000"
     
-    if "1" in each_element[0]:
-        return "1"
-    elif "2" in each_element[0]:
-        return "2"
-    elif "3" in each_element[0]:
-        return "3"
-    else:
-        return "10000"
+# record the num of class
+def record_num_class(var_list, array_index_list, array_dim_list):
+    class_choice = ["graph", "array", "op", "reverse"]
+    output_list = []
+    for (i, var_list_item) in enumerate(var_list):
+        if i in array_index_list:
+            temp1 = [1, var_list_item]
+            array_class = cal_array_class(array_dim_list, i)
+            temp1.append(int(array_class))
+            output_list.append(temp1)
+        else:
+            class_dict = {'graph': 0, 'op': 2, 'reverse': 3, 'norm': 4}
+            for class_key in class_dict:
+                if class_key in var_list_item:
+                    output_list.append([class_dict[class_key], class_key])
+                    break
+    return output_list
 
+#create the definition
+def create_definition(output_list, function_name):
+    write_string = f'm.def("{function_name}",[]('
+    argument_dict = {0: "graph_t& graph", 2: "op_t op", 3: "bool reverse", 4: "bool norm"}
+    for item in output_list:
+        if item[0] in argument_dict:
+            write_string += f'{argument_dict[item[0]]}, '
+        elif item[0] == 1:
+            write_string += f'py::capsule& {item[1]}, '
+    write_string = write_string[:-2] + "){\n"
+    return write_string
 
+#create the transfrom code
+def create_transform_code(output_list, write_string, var_list, array_index_list, function_name):
+    for each in output_list:
+        if each[0] == 1 and each[2] in [1, 2, 3]:
+            write_string += f'        array{each[2]}d_t<float> {each[1]}_array = capsule_to_array{each[2]}d('
+            write_string += f'{each[1].replace("_array", "")});\n'
+    
+    write_string += f'    return {function_name}('
+    for (i, var_list_item) in enumerate(var_list):
+        if i in array_index_list:
+            write_string += f'{var_list_item}_array, '
+        elif var_list_item == 'op':
+            write_string += f'(op_t)op, '
+        else:
+            write_string += f'{var_list_item}, '
+    return write_string[:-3] + ");\n    }\n  );\n"
+
+#primary generation function
 def generate_pybind_code(all_string):
-#         print(type(a))
-        #print(a)
-        string_sep = all_string.split("{")
-        fuc_var = string_sep[0].split("(")
-        function_name = get_fuc_name(fuc_var)
-        var_list, array_dim_list, array_index_list = fuc_var_class(fuc_var)
-#         print(var_list)
-#         print(array_dim_list)
-#         print(array_index_list)
-        # record the num of class
-        class_choice = ["graph", "array", "op", "reverse"]
-        output_list = []
-        for i in range(len(var_list)):
-            if i in array_index_list:
-                
-                temp1 = [1, var_list[i]]
-#                 print(array_dim_list[i])
-                array_class = cal_array_class(array_dim_list, i)
-                temp1.append(int(array_class))
-                output_list.append(temp1)
-                
-                
-            else:
-#             print(i)
-                if "graph" in var_list[i]:
-                    output_list.append([0, "graph"])
-                elif "op" in var_list[i]:
-                    output_list.append([2, "op"])
-                elif "reverse" in var_list[i]:
-                    output_list.append([3, "reverse"])
-                elif "norm" in var_list[i]:
-                    output_list.append([4, "norm"])
-            # deal with the array
-                
-        write_string = "m.def(\"" + function_name + "\",[]("
-        # create the definition
-#         print("aaa", output_list)
-        for each in output_list:
-#             print(each)
-            if each[0] == 0:
-                write_string = write_string + "graph_t& graph, "
-            elif each[0] == 1:
-                write_string = write_string + "py::capsule& "
-                #print(each[1])
-                new_input = each[1] + ", "
-                write_string = write_string + new_input
-            elif each[0] == 2:
-                write_string = write_string + "op_t op, "
-            elif each[0] == 3:
-                write_string = write_string + "bool reverse, "
-            elif each[0] == 4:
-                write_string = write_string + "bool norm, "
-        write_string = write_string.rstrip(write_string[-1])
-        write_string = write_string.rstrip(write_string[-1])
-        write_string = write_string + "){\n"
-        # create the transfrom code
-        for each in output_list:
-#             print(each[0])
-            if each[0] == 1:
-#                 print("ha")
-#                 print(type(each[2]))
-#                 print(each[2])
-                if each[2] == int(1):
-                    
-                    write_string = write_string + "        array1d_t<float> " + each[1] + "_array = capsule_to_array1d("
-                    new_input = each[1].replace("_array", "")
-                    write_string = write_string + new_input + ");\n" 
-                
-                if each[2] == int(2):
-                    write_string = write_string + "        array2d_t<float> " + each[1] + "_array = capsule_to_array2d("
-                    new_input = each[1].replace("_array", "")
-                    write_string = write_string + new_input + ");\n" 
-                    
-                if each[2] == int(3):
-                    write_string = write_string + "        array3d_t<float> " + each[1] + "_array = capsule_to_array3d("
-                    new_input = each[1].replace("_array", "")
-                    write_string = write_string + new_input + ");\n"
-                
-            else:
-                continue
-        
-        #print(function_name)
-        write_string = write_string + "    return " + function_name + "("
-        for i in range(len(var_list)):
-            if i in array_index_list:
-                write_string = write_string + var_list[i] + "_array, "
-            else:
-                if var_list[i] == "op":
-                    write_string = write_string + "(op_t)" + var_list[i] + ", "
-                else:
-                    write_string = write_string + var_list[i] + ", "
-        
-        write_string = write_string.rstrip(write_string[-1])
-        write_string = write_string.rstrip(write_string[-1])
-        write_string = write_string.rstrip(write_string[-1])
-        write_string = write_string + ");\n    }\n  );\n"
-        
-#         print(write_string)
-        # write the pybind code to output file
-#         file1 = open(output_file, 'w')
-#         file1.write(write_string)
-        return write_string
-        
-                
+    string_sep = all_string.split("{")
+    fuc_var = string_sep[0].split("(")
+    function_name = get_fuc_name(fuc_var)
+    var_list, array_dim_list, array_index_list = fuc_var_class(fuc_var) #get initial function information
+    output_list = record_num_class(var_list, array_index_list, array_dim_list) #get function args
+    write_string = create_definition(output_list, function_name) #create initial definition
+    write_string = create_transform_code(output_list, write_string, var_list, array_index_list, function_name) #create transform code
+    return write_string
+    
 def generate_binding_file(input_file, output_file):
     write_string = "inline void export_kernel(py::module &m) { \n"
-    with open(input_file, 'r') as reader:
-        lines = reader.readlines()
-    #output_string = "#pragma once" + "\n" + "#include \"csr.h\"" + "\n" + "#include \"op.h\"" + "\n" + "extern int THD_COUNT;" + '\n'
-    
-    for line in lines:
-#         print(count)
-        output_string = generate_pybind_code(line)
-        write_string = write_string + "    " + output_string
-    write_string = write_string + "}"
-    #print(write_string)
-#     print(output_file)
-    file1 = open(output_file, 'w')
-    file1.write(write_string)                
+    with open(input_file, 'r') as file:
+        lines = file.readlines()
+    write_string += ''.join(f'    {generate_pybind_code(line)}' for line in lines) + '}'
+    with open(output_file, 'w') as file:
+        file.write(write_string)
