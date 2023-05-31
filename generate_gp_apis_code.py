@@ -28,13 +28,9 @@ def fuc_var_class(fuc_name):
 
 def cal_array_class(array_dim_list, i):
     each_element = array_dim_list[i]
-    
-    if "1" in each_element[0]:
-        return "1"
-    elif "2" in each_element[0]:
-        return "2"
-    elif "3" in each_element[0]:
-        return "3"
+    for i in range(3):
+        if str(i+1) in each_element[0]:
+            return str(i+1)
     else:
         return "10000"
 
@@ -76,20 +72,18 @@ def make_function_header(function_name, output_list, string_dict):
             write_string += f'{new_input}, '
         elif (item[0] == 4) and (item[2] in [2, 3]):
             write_string += ', '.join(f'dim{i}' for i in range(item[2])) + ', '
-    write_string = write_string[:-2] + "):\n" #remove final comma/space and add ender
+    write_string = write_string + "device0):\n" #remove final comma/space and add ender
     return write_string, num_of_dlpack_index, num_of_dlpack_name
 
 #add dlpack and device lines
-def add_dlpack(num_of_dlpack_index, num_of_dlpack_name, gpu, write_string):
+def add_dlpack(num_of_dlpack_index, num_of_dlpack_name, write_string):
     for (k, _) in enumerate(num_of_dlpack_index):
         write_string += f'{INDENTATION}{num_of_dlpack_name[k]}_dl = th.utils.dlpack.to_dlpack({num_of_dlpack_name[k]})\n'
-    if gpu != 0:
-          write_string += f"{INDENTATION}cuda0 = th.device('{gpu}')\n"
     return write_string
 
 #declare the tensor allocation
-def declare_tensor_allocation(output_index_list, array_dim_list, write_string, gpu, function_name):
-    device_string = ', device = cuda0' if bool(gpu) else ""
+def declare_tensor_allocation(output_index_list, array_dim_list, write_string, function_name):
+    device_string = ', device = device0'
     for each in output_index_list:
         array_class = cal_array_class(array_dim_list, each)
         if array_class == '2':
@@ -100,7 +94,7 @@ def declare_tensor_allocation(output_index_list, array_dim_list, write_string, g
     return write_string
 
 #primary code generation function
-def generate_pybind_code(all_string, gpu):
+def generate_pybind_code(all_string):
     string_dict = {0: 'graph', 2: 'op', 3: 'reverse', 5: 'norm'}
     function_string = all_string.split("{")
     fuc_var = function_string[0].split("(")
@@ -109,8 +103,8 @@ def generate_pybind_code(all_string, gpu):
     
     output_list = get_arguments(var_list, array_dim_list, output_index_list, array_index_list) #get func arguments
     write_string, num_of_dlpack_index, num_of_dlpack_name = make_function_header(function_name, output_list, string_dict) #make header for func
-    write_string = add_dlpack(num_of_dlpack_index, num_of_dlpack_name, gpu, write_string) #add dlpack and device lines
-    write_string = declare_tensor_allocation(output_index_list, array_dim_list, write_string, gpu, function_name) #declare the tensor allocation
+    write_string = add_dlpack(num_of_dlpack_index, num_of_dlpack_name, write_string) #add dlpack and device lines
+    write_string = declare_tensor_allocation(output_index_list, array_dim_list, write_string, function_name) #declare the tensor allocation
     
     flag = 0
     for (i, item) in enumerate(output_list):
@@ -124,13 +118,13 @@ def generate_pybind_code(all_string, gpu):
     write_string = f'{write_string[:-2]})\n{INDENTATION}return res \n'
     return write_string
 
-def generate_binding_file(input_file, output_file, gpu):
+def generate_binding_file(input_file, output_file):
     write_string = ('import torch as th' '\n'
                     'import torch.utils.dlpack' '\n'
                     'import kernel as gpk' '\n')
     with open(input_file, 'r') as file:
         lines = file.readlines()
     
-    write_string += ''.join(generate_pybind_code(line, gpu) for line in lines)
+    write_string += ''.join(generate_pybind_code(line) for line in lines)
     with open(output_file, 'w') as file:
         file.write(write_string)
