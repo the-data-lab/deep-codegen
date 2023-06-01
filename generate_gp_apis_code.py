@@ -25,14 +25,12 @@ def fuc_var_class(fuc_name):
     array_index_list = [i for i in array_index_list if i not in output_index_list]
     return var_list, array_dim_list, array_index_list, output_index_list
 
-
 def cal_array_class(array_dim_list, i):
     each_element = array_dim_list[i]
     for i in range(3):
         if str(i+1) in each_element[0]:
             return str(i+1)
-    else:
-        return "10000"
+    return "10000"
 
 #get a list of arguments for the function
 def get_arguments(var_list, array_dim_list, output_index_list, array_index_list):
@@ -70,7 +68,7 @@ def make_function_header(function_name, output_list, string_dict):
             new_input = f'{item[1]}1'
             num_of_dlpack_name.append(new_input)
             write_string += f'{new_input}, '
-        elif (item[0] == 4) and (item[2] in [2, 3]):
+        elif (item[0] == 4) and (item[2] in range(1, 4)):
             write_string += ', '.join(f'dim{i}' for i in range(item[2])) + ', '
     write_string = write_string + "device0):\n" #remove final comma/space and add ender
     return write_string, num_of_dlpack_index, num_of_dlpack_name
@@ -83,13 +81,10 @@ def add_dlpack(num_of_dlpack_index, num_of_dlpack_name, write_string):
 
 #declare the tensor allocation
 def declare_tensor_allocation(output_index_list, array_dim_list, write_string, function_name):
-    device_string = ', device = device0'
     for each in output_index_list:
         array_class = cal_array_class(array_dim_list, each)
-        if array_class == '2':
-            write_string += f'{INDENTATION}res = th.zeros(dim0, dim1{device_string})\n{INDENTATION}res_dl = th.utils.dlpack.to_dlpack(res)\n'
-        elif array_class == '3':
-            write_string += f'{INDENTATION}res = th.zeros(dim0, dim1, dim2{device_string})\n{INDENTATION}res_dl = th.utils.dlpack.to_dlpack(res)\n'
+        dimension_string = ', '.join(f'dim{i}' for i in range(int(array_class)))
+        write_string += f'{INDENTATION}res = th.zeros({dimension_string}, device = device0)\n{INDENTATION}res_dl = th.utils.dlpack.to_dlpack(res)\n'
     write_string += f'{INDENTATION}gpk.{function_name}('
     return write_string
 
