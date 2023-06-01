@@ -77,7 +77,7 @@ def make_arguments(output_list, string_dict):
             new_input = f'{item[1]}1'
             num_of_dlpack_name.append(new_input)
             write_string += f'{new_input}, '
-        elif (item[0] == 4) and (item[2] in [2, 3]):
+        elif (item[0] == 4) and (item[2] in range(1, 4)):
             write_string += ', '.join(f'dim{i}' for i in range(item[2])) + ', '
     write_string += "device0" #remove final comma/space and add ender
     return write_string

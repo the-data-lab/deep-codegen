@@ -25,7 +25,6 @@ def fuc_var_class(fuc_name):
     array_index_list = [i for i in array_index_list if i not in output_index_list]
     return var_list, array_dim_list, array_index_list, output_index_list
 
-
 def cal_array_class(array_dim_list, i):
     each_element = array_dim_list[i]
     for i in range(3):
@@ -69,7 +68,7 @@ def make_function_header(function_name, output_list, string_dict):
             new_input = f'{item[1]}1'
             num_of_dlpack_name.append(new_input)
             write_string += f'{new_input}, '
-        elif (item[0] == 4) and (item[2] in [2, 3]):
+        elif (item[0] == 4) and (item[2] in range(1, 4)):
             write_string += ', '.join(f'dim{i}' for i in range(item[2])) + ', '
     write_string = write_string + "device0):\n" #remove final comma/space and add ender
     return write_string, num_of_dlpack_index, num_of_dlpack_name
