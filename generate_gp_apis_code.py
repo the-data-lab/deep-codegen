@@ -31,8 +31,7 @@ def cal_array_class(array_dim_list, i):
     for i in range(3):
         if str(i+1) in each_element[0]:
             return str(i+1)
-    else:
-        return "10000"
+    return "10000"
 
 #get a list of arguments for the function
 def get_arguments(var_list, array_dim_list, output_index_list, array_index_list):
@@ -83,13 +82,10 @@ def add_dlpack(num_of_dlpack_index, num_of_dlpack_name, write_string):
 
 #declare the tensor allocation
 def declare_tensor_allocation(output_index_list, array_dim_list, write_string, function_name):
-    device_string = ', device = device0'
     for each in output_index_list:
         array_class = cal_array_class(array_dim_list, each)
-        if array_class == '2':
-            write_string += f'{INDENTATION}res = th.zeros(dim0, dim1{device_string})\n{INDENTATION}res_dl = th.utils.dlpack.to_dlpack(res)\n'
-        elif array_class == '3':
-            write_string += f'{INDENTATION}res = th.zeros(dim0, dim1, dim2{device_string})\n{INDENTATION}res_dl = th.utils.dlpack.to_dlpack(res)\n'
+        dimension_string = ', '.join(f'dim{i}' for i in range(int(array_class)))
+        write_string += f'{INDENTATION}res = th.zeros({dimension_string}, device = device0)\n{INDENTATION}res_dl = th.utils.dlpack.to_dlpack(res)\n'
     write_string += f'{INDENTATION}gpk.{function_name}('
     return write_string
 
