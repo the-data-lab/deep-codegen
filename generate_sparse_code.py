@@ -86,10 +86,11 @@ def generate_base_function(function_name, output_list, string_dict):
 
 def generate_real_function(function_name, output_list, string_dict):
     args = make_arguments(output_list, string_dict)
+    inputs = [arg for arg in args.split(', ') if 'input' in arg]
     write_string = f'def {function_name}_real({args}):\n'
     write_string += f'{INDENTATION}out = gp_apis.gp_{function_name}({args.replace("reverse", "1")})\n'
-    write_string += f'{INDENTATION}def grad(dZ):\n'
-    write_string += f'{INDENTATION*2}return gp_apis.gp_{function_name}({args.replace("reverse", "0").replace("input1", "dZ")})\n'
+    write_string += f'{INDENTATION}def grad({", ".join(arg.replace("input", "dZ") for arg in inputs)}):\n'
+    write_string += f'{INDENTATION*2}return gp_apis.gp_{function_name}({args.replace("reverse", "0").replace("input", "dZ")})\n'
     write_string += f'{INDENTATION}return out, grad\n\n'
     return write_string
 
