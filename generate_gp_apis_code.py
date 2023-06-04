@@ -65,9 +65,8 @@ def make_function_header(function_name, output_list, string_dict):
             write_string += f'{string_dict[item[0]]}, '
         elif item[0] == 1:
             num_of_dlpack_index.append(j)
-            new_input = f'{item[1]}1'
-            num_of_dlpack_name.append(new_input)
-            write_string += f'{new_input}, '
+            num_of_dlpack_name.append(item[1])
+            write_string += f'{item[1]}, '
         elif (item[0] == 4) and (item[2] in range(1, 4)):
             write_string += ', '.join(f'dim{i}' for i in range(item[2])) + ', '
     write_string = write_string + "device0):\n" #remove final comma/space and add ender
