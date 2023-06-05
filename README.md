@@ -4,7 +4,6 @@ A tool to generate code for customizing deep learning libraries. The input file 
 * `kernel.h`
 * `generated_pybind.h`
 * `generated_classes.py`
-* `generated_classes.py`
 * `generated_tf.py`
 * `generated_sparse.py`
 
