@@ -64,6 +64,7 @@ def make_arguments(output_list, string_dict):
     write_string += "device0" #remove final comma/space and add ender
     return write_string
 
+#get function information
 def fuc_var_class(fuc_name):
     arguments = fuc_name[1].split(",")
     var_list = [remove_unnecessary_chars(argument.split(" ")[-1]) for argument in arguments]
@@ -74,6 +75,7 @@ def fuc_var_class(fuc_name):
     array_index_list = [i for i in array_index_list if i not in output_index_list]
     return var_list, array_dim_list, array_index_list, output_index_list
 
+#generate the base function that calls the real function
 def generate_base_function(function_name, output_list, string_dict):
     args = make_arguments(output_list, string_dict)
     inputs = [arg for arg in args.split(', ') if 'input' in arg]
@@ -84,6 +86,7 @@ def generate_base_function(function_name, output_list, string_dict):
     write_string += f'{INDENTATION}return _lambda({", ".join(inputs)})\n\n'
     return write_string
 
+#generate the real function called by the base function
 def generate_real_function(function_name, output_list, string_dict):
     args = make_arguments(output_list, string_dict)
     inputs = [arg for arg in args.split(', ') if 'input' in arg]
@@ -94,6 +97,7 @@ def generate_real_function(function_name, output_list, string_dict):
     write_string += f'{INDENTATION}return out, grad\n\n'
     return write_string
 
+#generate overall code
 def generate_code(line_string):
     string_dict = {0: 'graph', 2: 'op', 3: 'reverse', 5: 'norm'}
     string_sep = line_string.split("{")

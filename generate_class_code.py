@@ -82,6 +82,7 @@ def make_arguments(output_list, string_dict):
     write_string += "device0" #remove final comma/space and add ender
     return write_string
 
+#get function information
 def fuc_var_class(fuc_name):
     arguments = fuc_name[1].split(",")
     var_list = [remove_unnecessary_chars(argument.split(" ")[-1]) for argument in arguments]
@@ -92,6 +93,7 @@ def fuc_var_class(fuc_name):
     array_index_list = [i for i in array_index_list if i not in output_index_list]
     return var_list, array_dim_list, array_index_list, output_index_list
 
+#make the `backward` static method
 def make_backward_method(output_list):
     string_dict = {0: 'graph', 2: 'op', 3: 'reverse', 5: 'norm'}
     write_string = (f'{INDENTATION}@staticmethod' '\n'
@@ -99,6 +101,7 @@ def make_backward_method(output_list):
     write_string += f'{INDENTATION*2}pass #must be implemented\n'
     return write_string
 
+#make the statements declaring the results/outputs
 def make_res_statements(num_outputs, output_list, string_dict, function_name):
     output_indeces = [i for (i, arg) in enumerate(output_list) if sum('output' in str(item) for item in arg) >= 1]
     result_string = ", ".join(f"res{i+1}" for i in range(num_outputs)) if num_outputs > 1 else "res" #string with list of results
@@ -107,6 +110,7 @@ def make_res_statements(num_outputs, output_list, string_dict, function_name):
     write_string += f'{INDENTATION}return {result_string}\n'
     return write_string
 
+#make the `forward` static method
 def make_forward_method(output_list, function_name):
     string_dict = {0: 'graph', 2: 'op', 3: 'reverse', 5: 'norm'}
     write_string = (f'{INDENTATION}@staticmethod' '\n'
