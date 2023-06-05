@@ -77,7 +77,8 @@ def make_arguments(output_list, string_dict):
             num_of_dlpack_name.append(item[1])
             write_string += f'{item[1]}, '
         elif (item[0] == 4) and (item[2] in range(1, 4)):
-            write_string += ', '.join(f'dim{i}' for i in range(item[2])) + ', '
+            id = item[1].replace("output", "")
+            write_string += ', '.join(f'dim{id}_{i}' for i in range(item[2])) + ', '
     write_string += "device0" #remove final comma/space and add ender
     return write_string
 
@@ -95,7 +96,15 @@ def make_backward_method(output_list):
     string_dict = {0: 'graph', 2: 'op', 3: 'reverse', 5: 'norm'}
     write_string = (f'{INDENTATION}@staticmethod' '\n'
                     f'{INDENTATION}def backward(ctx, dZ):' '\n')
-    write_string += f'{INDENTATION*2}#must be implemented\n'
+    write_string += f'{INDENTATION*2}pass #must be implemented\n'
+    return write_string
+
+def make_res_statements(num_outputs, output_list, string_dict, function_name):
+    output_indeces = [i for (i, arg) in enumerate(output_list) if sum('output' in str(item) for item in arg) >= 1]
+    result_string = ", ".join(f"res{i+1}" for i in range(num_outputs)) if num_outputs > 1 else "res" #string with list of results
+    write_string = f'{INDENTATION*2}{result_string} = gp_apis.gp_{function_name}({make_arguments(output_list, string_dict)})\n'
+    write_string += f'{INDENTATION*2}ctx.backward_cache = None #must be implemented\n'
+    write_string += f'{INDENTATION}return {result_string}\n'
     return write_string
 
 def make_forward_method(output_list, function_name):
@@ -103,9 +112,8 @@ def make_forward_method(output_list, function_name):
     write_string = (f'{INDENTATION}@staticmethod' '\n'
                     f'{INDENTATION}def forward(ctx, ')
     write_string += f'{make_arguments(output_list, string_dict)}):\n'
-    write_string += f'{INDENTATION*2}res = gp_apis.gp_{function_name}({make_arguments(output_list, string_dict)})\n'
-    write_string += (f'{INDENTATION*2}ctx.backward_cache = None #must be implimented' '\n'
-                     f'{INDENTATION*2}return res' '\n')
+    outputs = [arg for arg in output_list if sum('output' in str(item) for item in arg) >= 1] #get outputs from arguments
+    write_string += make_res_statements(len(outputs), output_list, string_dict, function_name)
     return write_string
 
 #generate the class code itself
