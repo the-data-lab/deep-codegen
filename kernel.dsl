@@ -10,3 +10,4 @@ void gsddmme2d(graph_t& graph, array3d_t<float>& input_left, array3d_t<float>& i
 void sddmme_model(graph_t& graph, array2d_t<float>& input_left, array2d_t<float>& input_right, array1d_t<float>& output, op_t op);
 void spmmw_model(graph_t& graph, array2d_t<float>& input, array1d_t<float>& edge_input, array1d_t<float>& bias, array2d_t<float>& output, op_t op, int64_t reverse);
 void spmmw_model_without_bias(graph_t& graph, array2d_t<float>& input, array1d_t<float>& edge_input, array2d_t<float>& output, op_t op, int64_t reverse);
+void test_2out(graph_t& graph, array2d_t<float>& input1, array2d_t<float>& input2, array2d_t<float>& output1, array2d_t<float>& output2, op_t op, int64_t reverse);

@@ -68,8 +68,9 @@ def make_function_header(function_name, output_list, string_dict):
             num_of_dlpack_name.append(item[1])
             write_string += f'{item[1]}, '
         elif (item[0] == 4) and (item[2] in range(1, 4)):
-            write_string += ', '.join(f'dim{i}' for i in range(item[2])) + ', '
-    write_string = write_string + "device0):\n" #remove final comma/space and add ender
+            id = item[1].replace("output", "")
+            write_string += ', '.join(f'dim{id}_{i}' for i in range(item[2])) + ', '
+    write_string += "device0):\n" #add ender
     return write_string, num_of_dlpack_index, num_of_dlpack_name
 
 #add dlpack and device lines
@@ -80,10 +81,11 @@ def add_dlpack(num_of_dlpack_index, num_of_dlpack_name, write_string):
 
 #declare the tensor allocation
 def declare_tensor_allocation(output_index_list, array_dim_list, write_string, function_name):
-    for each in output_index_list:
+    for (id, each) in enumerate(output_index_list):
+        id = "" if len(output_index_list) == 1 else str(id+1)
         array_class = cal_array_class(array_dim_list, each)
-        dimension_string = ', '.join(f'dim{i}' for i in range(int(array_class)))
-        write_string += f'{INDENTATION}res = th.zeros({dimension_string}, device = device0)\n{INDENTATION}res_dl = th.utils.dlpack.to_dlpack(res)\n'
+        dimension_string = ', '.join(f'dim{id}_{i}' for i in range(int(array_class)))
+        write_string += f'{INDENTATION}res{id} = th.zeros({dimension_string}, device = device0)\n{INDENTATION}res_dl{id} = th.utils.dlpack.to_dlpack(res{id})\n'
     write_string += f'{INDENTATION}gpk.{function_name}('
     return write_string
 
@@ -101,15 +103,21 @@ def generate_pybind_code(all_string):
     write_string = declare_tensor_allocation(output_index_list, array_dim_list, write_string, function_name) #declare the tensor allocation
     
     flag = 0
+    output_tracker = 1 if len(output_index_list) > 1 else ""
     for (i, item) in enumerate(output_list):
         if item[0] in string_dict:
             write_string += f'{string_dict[item[0]]}, '
         elif item[0] == 1:
-            write_string += num_of_dlpack_name[flag] + "_dl" + ", "
+            write_string += num_of_dlpack_name[flag] + "_dl, "
             flag += 1
         elif item[0] == 4:
-            write_string += "res_dl, "
-    write_string = f'{write_string[:-2]})\n{INDENTATION}return res \n'
+            write_string += f"res_dl{output_tracker}, "
+            output_tracker = "" if len(output_index_list) == 1 else output_tracker+1
+    
+    if len(output_index_list) == 1:
+        write_string = f'{write_string[:-2]})\n{INDENTATION}return res\n'
+    else:
+        write_string = f'{write_string[:-2]})\n{INDENTATION}return {", ".join(f"res{i+1}" for (i, _) in enumerate(output_index_list))}\n'
     return write_string
 
 def generate_binding_file(input_file, output_file):
