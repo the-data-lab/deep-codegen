@@ -95,9 +95,11 @@ def fuc_var_class(fuc_name):
 
 #make the `backward` static method
 def make_backward_method(output_list):
+    num_outputs = len([arg for arg in enumerate(output_list) if sum('output' in str(item) for item in arg) >= 1])
     string_dict = {0: 'graph', 2: 'op', 3: 'reverse', 5: 'norm'}
+    arg_string = ', '.join(f'dZ{i+1}' for i in range(num_outputs)) if num_outputs > 1 else 'dZ'
     write_string = (f'{INDENTATION}@staticmethod' '\n'
-                    f'{INDENTATION}def backward(ctx, dZ):' '\n')
+                    f'{INDENTATION}def backward(ctx, {arg_string}):' '\n')
     write_string += f'{INDENTATION*2}pass #must be implemented\n'
     return write_string
 
