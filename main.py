@@ -5,11 +5,15 @@ import generate_class_code as gc
 import generate_tf_code as gt
 import generate_sparse_code as gs
 
-gg.generate_binding_file("kernel.dsl", "gp_apis.py")
+#Generate common back-end code
 gh.generate_header_file("kernel.dsl")
 gp.generate_binding_file("kernel.dsl", "generated_pybind.h")
-gc.generate_class_file('kernel.dsl', 'generated_classes.py')
-gc.generate_class_file('kernel.dsl', 'generated_classes.py')
-gt.generate_tf_file('kernel.dsl', 'generated_tf.py')
-gs.generate_sparse_file('kernel.dsl', 'generated_sparse.py')
+
+#Generate Pytorch specific code
+gg.generate_binding_file("kernel.dsl", "gp_apis.py")
+gc.generate_class_file('kernel.dsl', 'pytorch_apis.py')
+
+#Generate Tensorflow specific code
+gt.generate_tf_file('kernel.dsl', 'gp_apis_tf.py')
+gs.generate_sparse_file('kernel.dsl', 'tf_apis.py')
 print("finished!")
