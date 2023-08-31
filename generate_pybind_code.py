@@ -70,8 +70,8 @@ def create_transform_code(output_list, write_string, var_list, array_index_list,
     for (i, var_list_item) in enumerate(var_list):
         if i in array_index_list:
             write_string += f'{var_list_item}_array, '
-        elif var_list_item == 'op':
-            write_string += f'(op_t)op, '
+        #elif var_list_item == 'op':
+        #    write_string += f'(op_t)op, '
         else:
             write_string += f'{var_list_item}, '
     return write_string[:-3] + ");\n    }\n  );\n"

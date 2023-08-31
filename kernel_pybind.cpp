@@ -59,7 +59,16 @@ array3d_t<float> capsule_to_array3d(py::capsule& capsule)
 
 #include "generated_pybind.h"
 
-PYBIND11_MODULE(kernel, m) {
+PYBIND11_MODULE(graphpy, m) {
+    
+    py::enum_<op_t>(m, "op_t", py::arithmetic(), "Operations Enums")
+        .value("eSUM", eSUM, "sum")
+        .value("eMAX", eMAX, "max")
+        .value("eMIN", eMIN, "min")
+        .value("eSUB", eSUB, "sub")
+        .value("eMUL", eMUL, "mul")
+        .value("eDIV", eDIV, "div")
+        .export_values();
 
   py::class_<graph_t>(m, "graph_t")
     .def(py::init<>())

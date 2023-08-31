@@ -10,9 +10,18 @@ def generate_header_file(input_file):
     output_string = ('#pragma once' '\n'
                      '#include "csr.h"' '\n'
                      '#include "op.h"' '\n\n')
+
     with open(input_file, 'r') as file:
         output_string += file.read()
     
     #write to output file
     with open(output_file, 'w') as file:
         file.write(output_string)
+
+
+    with open(input_file, 'r') as file:
+     output_string = file.read()
+
+    output_file_cu = input_file_name + ".cu"
+    with open(output_file_cu, 'w') as file:
+        file.write ('#include "' + output_file + '"\n\n' + output_string.replace(";", "{;}"))

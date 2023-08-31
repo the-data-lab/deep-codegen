@@ -2,7 +2,7 @@
 #cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ../<source>
 #cmake -DCMAKE_BUILD_TYPE=Release ../<source>
 
-cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(graphpy)
 
 set(CMAKE_CXX_STANDARD 14)  # enable C++11 standard
@@ -34,7 +34,7 @@ set_target_properties(graphpy PROPERTIES  COMPILE_FLAGS ${COMPILE_FLAGS_COMMON}
                       LINK_FLAGS ${LINK_FLAGS_COMMON})
 
 set(gp_source_files
-    test.cu
+    kernel.cu
     kernel.h
     op.h
     Makefile

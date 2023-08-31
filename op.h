@@ -137,23 +137,3 @@ struct array3d_t {
             : data_ptr(ptr), matrix_count (matrix), row_count (row),col_count(col) { }
 };
 
-
-#ifdef __CUDACC__
-#include <cub/block/block_scan.cuh>
-using namespace cub;
-
-struct kv_t {
-	vid_t key;
-	float value;
-};
-
-// BlockScan specialization
-typedef BlockScan<
-	kv_t,
-	BLOCK_SIZE,
-	BLOCK_SCAN_WARP_SCANS>
-BlockScanT;
-
-typedef ReduceByKeyOp<cub::Sum> ReduceBySegmentOpT;
-#endif
-
