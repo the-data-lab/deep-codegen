@@ -21,7 +21,7 @@ array1d_t<float> capsule_to_array1d(py::capsule& capsule)
     assert(dlMTensor);
     DLTensor* tensor = &dlMTensor->dl_tensor;
     
-    int64_t shape0 = tensor->shape[0];
+    int shape0 = tensor->shape[0];
     float*  data_ptr = (float*)tensor->data;
 
     array1d_t<float> array(data_ptr, shape0);
@@ -34,8 +34,8 @@ array2d_t<float> capsule_to_array2d(py::capsule& capsule)
     assert(dlMTensor);
     DLTensor* tensor = &dlMTensor->dl_tensor;
     
-    int64_t shape0 = tensor->shape[0];
-    int64_t shape1 = tensor->shape[1];
+    int shape0 = tensor->shape[0];
+    int shape1 = tensor->shape[1];
     float*  data_ptr = (float*)tensor->data;
 
     array2d_t<float> array(data_ptr, shape0, shape1);
@@ -48,12 +48,28 @@ array3d_t<float> capsule_to_array3d(py::capsule& capsule)
     assert(dlMTensor);
     DLTensor* tensor = &dlMTensor->dl_tensor;
     
-    int64_t shape0 = tensor->shape[0];
-    int64_t shape1 = tensor->shape[1];
-    int64_t shape2 = tensor->shape[2];
+    int shape0 = tensor->shape[0];
+    int shape1 = tensor->shape[1];
+    int shape2 = tensor->shape[2];
     float*  data_ptr = (float*)tensor->data;
 
     array3d_t<float> array(data_ptr, shape0, shape1, shape2);
+    return array;
+}
+
+array4d_t<float> capsule_to_array4d(py::capsule& capsule) 
+{
+    DLManagedTensor * dlMTensor = static_cast<DLManagedTensor*>(capsule);
+    assert(dlMTensor);
+    DLTensor* tensor = &dlMTensor->dl_tensor;
+    
+    int shape0 = tensor->shape[0];
+    int shape1 = tensor->shape[1];
+    int shape2 = tensor->shape[2];
+    int shape3 = tensor->shape[3];
+    float*  data_ptr = (float*)tensor->data;
+
+    array4d_t<float> array(data_ptr, shape0, shape1, shape2, shape3);
     return array;
 }
 
@@ -80,7 +96,7 @@ PYBIND11_MODULE(graphpy, m) {
     
     
   m.def("init_graph",
-      [](py::array offset_csr, py::array nebrs_csr, py::array offset_csc, py::array nebrs_csc, int64_t flag, int64_t num_vcount) {
+      [](py::array offset_csr, py::array nebrs_csr, py::array offset_csc, py::array nebrs_csc, int flag, int num_vcount) {
            graph_t* graph =  new graph_t;
            //cout<< offset_csr.shape(0) - 1<< "num_vcount"<< endl;
            graph->init(offset_csr.shape(0) - 1, nebrs_csr.itemsize(), 

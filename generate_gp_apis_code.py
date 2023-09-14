@@ -27,7 +27,7 @@ def fuc_var_class(fuc_name):
 
 def cal_array_class(array_dim_list, i):
     each_element = array_dim_list[i]
-    for i in range(3):
+    for i in range(4):
         if str(i+1) in each_element[0]:
             return str(i+1)
     return "10000"
@@ -67,7 +67,7 @@ def make_function_header(function_name, output_list, string_dict):
             num_of_dlpack_index.append(j)
             num_of_dlpack_name.append(item[1])
             write_string += f'{item[1]}, '
-        elif (item[0] == 4) and (item[2] in range(1, 4)):
+        elif (item[0] == 4) and (item[2] in range(1, 5)):
             id = item[1].replace("output", "")
             write_string += ', '.join(f'dim{id}_{i}' for i in range(item[2])) + ', '
     write_string += "device0):\n" #add ender

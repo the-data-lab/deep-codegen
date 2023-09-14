@@ -24,7 +24,7 @@ def fuc_var_class(function_info):
 #get dimension of element in `array_dim_list`
 def cal_array_class(array_dim_list, i):
     each_element = array_dim_list[i]
-    for i in range(3):
+    for i in range(4):
         if str(i+1) in each_element[0]:
             return str(i+1)
     return "10000"
@@ -62,7 +62,7 @@ def create_definition(output_list, function_name):
 #create the transfrom code
 def create_transform_code(output_list, write_string, var_list, array_index_list, function_name):
     for each in output_list:
-        if each[0] == 1 and each[2] in [1, 2, 3]:
+        if each[0] == 1 and each[2] in [1, 2, 3, 4]:
             write_string += f'        array{each[2]}d_t<float> {each[1]}_array = capsule_to_array{each[2]}d('
             write_string += f'{each[1].replace("_array", "")});\n'
     

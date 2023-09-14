@@ -9,3 +9,4 @@ void gsddmmvv(graph_t& graph, array2d_t<float>& input_left, array2d_t<float>& in
 void gsddmmvv2d(graph_t& graph, array3d_t<float>& input_left, array3d_t<float>& input_right, array2d_t<float>& output, op_t op, bool reverse);
 void test_2out(graph_t& graph, array2d_t<float>& input1, array2d_t<float>& input2, array2d_t<float>& output1, array2d_t<float>& output2, op_t op, bool reverse);
 void test3(array2d_t<float>& input1, array2d_t<float>& input2, array2d_t<float>& output1, array2d_t<float>& output2, op_t op, bool reverse);
+void test4(array4d_t<float>& input2, array4d_t<float>& output1);

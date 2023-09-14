@@ -108,8 +108,8 @@ CUDA_ONLY inline op_scalar_fn get_fn_kernel(op_t op) {
 template <class T>
 struct array1d_t {
     T* data_ptr;
-    int64_t col_count;
-    array1d_t(T* ptr, int64_t col) 
+    int col_count;
+    array1d_t(T* ptr, int col) 
             : data_ptr(ptr), col_count(col) { }
 };
 
@@ -119,9 +119,9 @@ struct array1d_t {
 template <class T>
 struct array2d_t {
     T* data_ptr;
-    int64_t row_count;
-    int64_t col_count;
-    array2d_t(T* ptr, int64_t row,  int64_t col) 
+    int row_count;
+    int col_count;
+    array2d_t(T* ptr, int row,  int col) 
             : data_ptr(ptr), row_count (row),col_count(col) { }
 
 };
@@ -130,10 +130,22 @@ struct array2d_t {
 template <class T>
 struct array3d_t {
     T* data_ptr;
-    int64_t matrix_count;
-    int64_t row_count;
-    int64_t col_count;
-    array3d_t(T* ptr, int64_t matrix, int64_t row, int64_t col) 
+    int matrix_count;
+    int row_count;
+    int col_count;
+    array3d_t(T* ptr, int matrix, int row, int col) 
             : data_ptr(ptr), matrix_count (matrix), row_count (row),col_count(col) { }
 };
 
+
+//4D tensor
+template <class T>
+struct array4d_t {
+    T* data_ptr;
+    int last_count;
+    int matrix_count;
+    int row_count;
+    int col_count;
+    array4d_t(T* ptr, int last, int matrix, int row, int col) 
+            : data_ptr(ptr), last_count(last), matrix_count (matrix), row_count (row),col_count(col) { }
+};
