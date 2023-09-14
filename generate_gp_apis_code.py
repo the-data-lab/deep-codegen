@@ -82,7 +82,7 @@ def add_dlpack(num_of_dlpack_index, num_of_dlpack_name, write_string):
 #declare the tensor allocation
 def declare_tensor_allocation(output_index_list, array_dim_list, write_string, function_name):
     for (id, each) in enumerate(output_index_list):
-        id = "" if len(output_index_list) == 1 else str(id+1)
+        id = str(id+1) #"" if len(output_index_list) == 1 else str(id+1)
         array_class = cal_array_class(array_dim_list, each)
         dimension_string = ', '.join(f'dim{id}_{i}' for i in range(int(array_class)))
         write_string += f'{INDENTATION}res{id} = th.zeros({dimension_string}, device = device0)\n{INDENTATION}res_dl{id} = th.utils.dlpack.to_dlpack(res{id})\n'
@@ -92,7 +92,7 @@ def declare_tensor_allocation(output_index_list, array_dim_list, write_string, f
 #primary code generation function
 def generate_pybind_code(all_string):
     string_dict = {0: 'graph', 2: 'op', 3: 'reverse', 5: 'norm'}
-    function_string = all_string.split("{")
+    function_string = all_string.split(")")
     fuc_var = function_string[0].split("(")
     function_name = get_fuc_name(fuc_var)
     var_list, array_dim_list, array_index_list, output_index_list = fuc_var_class(fuc_var)
@@ -103,7 +103,7 @@ def generate_pybind_code(all_string):
     write_string = declare_tensor_allocation(output_index_list, array_dim_list, write_string, function_name) #declare the tensor allocation
     
     flag = 0
-    output_tracker = 1 if len(output_index_list) > 1 else ""
+    output_tracker = 1 #if len(output_index_list) > 1 else ""
     for (i, item) in enumerate(output_list):
         if item[0] in string_dict:
             write_string += f'{string_dict[item[0]]}, '
@@ -112,7 +112,7 @@ def generate_pybind_code(all_string):
             flag += 1
         elif item[0] == 4:
             write_string += f"res_dl{output_tracker}, "
-            output_tracker = "" if len(output_index_list) == 1 else output_tracker+1
+            output_tracker = output_tracker+1 #"" if len(output_index_list) == 1 else output_tracker+1
     
     if len(output_index_list) == 1:
         write_string = f'{write_string[:-2]})\n{INDENTATION}return res\n'
@@ -123,7 +123,7 @@ def generate_pybind_code(all_string):
 def generate_binding_file(input_file, output_file):
     write_string = ('import torch as th' '\n'
                     'import torch.utils.dlpack' '\n'
-                    'import kernel as gpk' '\n')
+                    'import graphpy as gpk' '\n')
     with open(input_file, 'r') as file:
         lines = file.readlines()
     

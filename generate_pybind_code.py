@@ -74,11 +74,11 @@ def create_transform_code(output_list, write_string, var_list, array_index_list,
         #    write_string += f'(op_t)op, '
         else:
             write_string += f'{var_list_item}, '
-    return write_string[:-3] + ");\n    }\n  );\n"
+    return write_string[:-2] + ");\n    }\n  );\n"
 
 #primary generation function
 def generate_pybind_code(all_string):
-    string_sep = all_string.split("{")
+    string_sep = all_string.split(")")
     fuc_var = string_sep[0].split("(")
     function_name = get_fuc_name(fuc_var)
     var_list, array_dim_list, array_index_list = fuc_var_class(fuc_var) #get initial function information

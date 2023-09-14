@@ -109,7 +109,7 @@ def make_res_statements(num_outputs, output_list, string_dict, function_name):
     result_string = ", ".join(f"res{i+1}" for i in range(num_outputs)) if num_outputs > 1 else "res" #string with list of results
     write_string = f'{INDENTATION*2}{result_string} = gp_apis.gp_{function_name}({make_arguments(output_list, string_dict)})\n'
     write_string += f'{INDENTATION*2}ctx.backward_cache = None #must be implemented\n'
-    write_string += f'{INDENTATION}return {result_string}\n'
+    write_string += f'{INDENTATION*2}return {result_string}\n'
     return write_string
 
 #make the `forward` static method
@@ -124,7 +124,7 @@ def make_forward_method(output_list, function_name):
 
 #generate the class code itself
 def generate_class_code(line_string):
-    string_sep = line_string.split("{")
+    string_sep = line_string.split(")")
     fuc_var = string_sep[0].split("(")
     function_name = get_fuc_name(fuc_var)
     var_list, array_dim_list, array_index_list, output_index_list = fuc_var_class(fuc_var)
@@ -139,7 +139,7 @@ def generate_class_code(line_string):
 #generate the wrapper function around the class
 def generate_wrapper_function(line_string):
     string_dict = {0: 'graph', 2: 'op', 3: 'reverse', 5: 'norm'}
-    string_sep = line_string.split("{")
+    string_sep = line_string.split(")")
     fuc_var = string_sep[0].split("(")
     function_name = get_fuc_name(fuc_var)
     var_list, array_dim_list, array_index_list, output_index_list = fuc_var_class(fuc_var)
