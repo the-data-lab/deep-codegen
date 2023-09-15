@@ -31,7 +31,6 @@ def cal_array_class(array_dim_list, i):
     
 # record the num of class
 def record_num_class(var_list, array_index_list, array_dim_list):
-    class_choice = ["graph", "array", "op", "reverse"]
     output_list = []
     for (i, var_list_item) in enumerate(var_list):
         if i in array_index_list:
@@ -40,22 +39,19 @@ def record_num_class(var_list, array_index_list, array_dim_list):
             temp1.append(int(array_class))
             output_list.append(temp1)
         else:
-            class_dict = {'graph': 0, 'op': 2, 'reverse': 3, 'norm': 4}
-            for class_key in class_dict:
-                if class_key in var_list_item:
-                    output_list.append([class_dict[class_key], class_key])
-                    break
+            temp1 = [2, var_list_item]
+            output_list.append(temp1)
     return output_list
 
 #create the definition
-def create_definition(output_list, function_name):
+def create_definition(output_list, array_dim_list, function_name):
     write_string = f'm.def("{function_name}",[]('
-    argument_dict = {0: "graph_t& graph", 2: "op_t op", 3: "bool reverse", 4: "bool norm"}
-    for item in output_list:
-        if item[0] in argument_dict:
-            write_string += f'{argument_dict[item[0]]}, '
-        elif item[0] == 1:
+    for (i, item )in enumerate(output_list):
+        if item[0] == 1:
             write_string += f'py::capsule& {item[1]}, '
+        else :
+            write_string += f'{array_dim_list[i][0]} '
+            write_string += f'{item[1]}, '
     write_string = write_string[:-2] + "){\n"
     return write_string
 
@@ -64,14 +60,12 @@ def create_transform_code(output_list, write_string, var_list, array_index_list,
     for each in output_list:
         if each[0] == 1 and each[2] in [1, 2, 3, 4]:
             write_string += f'        array{each[2]}d_t<float> {each[1]}_array = capsule_to_array{each[2]}d('
-            write_string += f'{each[1].replace("_array", "")});\n'
+            write_string += f'{each[1]});\n'
     
     write_string += f'    return {function_name}('
     for (i, var_list_item) in enumerate(var_list):
         if i in array_index_list:
             write_string += f'{var_list_item}_array, '
-        #elif var_list_item == 'op':
-        #    write_string += f'(op_t)op, '
         else:
             write_string += f'{var_list_item}, '
     return write_string[:-2] + ");\n    }\n  );\n"
@@ -83,7 +77,7 @@ def generate_pybind_code(all_string):
     function_name = get_fuc_name(fuc_var)
     var_list, array_dim_list, array_index_list = fuc_var_class(fuc_var) #get initial function information
     output_list = record_num_class(var_list, array_index_list, array_dim_list) #get function args
-    write_string = create_definition(output_list, function_name) #create initial definition
+    write_string = create_definition(output_list, array_dim_list, function_name) #create initial definition
     write_string = create_transform_code(output_list, write_string, var_list, array_index_list, function_name) #create transform code
     return write_string
     

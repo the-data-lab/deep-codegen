@@ -34,7 +34,6 @@ def cal_array_class(array_dim_list, i):
 
 #get a list of arguments for the function
 def get_arguments(var_list, array_dim_list, output_index_list, array_index_list):
-    class_choice = ["graph", "array", "op", "reverse"]
     output_list = []
     for (i, var_list_item) in enumerate(var_list):
         if i in array_index_list:
@@ -48,28 +47,25 @@ def get_arguments(var_list, array_dim_list, output_index_list, array_index_list)
             temp1.append(int(array_class))
             output_list.append(temp1)
         else:
-            number_dict = {"graph": 0, "op": 2, "reverse": 3, "norm": 5}
-            for key in number_dict:
-                if key in var_list_item:
-                    output_list.append([number_dict[key], key])
-                    break
+            temp1 = [2, var_list_item]
+            output_list.append(temp1)
     return output_list
 
 #get the function header (ie, `def` plus the name and the arguments)
-def make_function_header(function_name, output_list, string_dict):
+def make_function_header(function_name, output_list):
     write_string = f'def gp_{function_name}('
     num_of_dlpack_index = []
     num_of_dlpack_name = []
     for (j, item) in enumerate(output_list):
-        if item[0] in string_dict:
-            write_string += f'{string_dict[item[0]]}, '
-        elif item[0] == 1:
+        if item[0] == 1:
             num_of_dlpack_index.append(j)
             num_of_dlpack_name.append(item[1])
             write_string += f'{item[1]}, '
         elif (item[0] == 4) and (item[2] in range(1, 5)):
             id = item[1].replace("output", "")
             write_string += ', '.join(f'dim{id}_{i}' for i in range(item[2])) + ', '
+        else :
+            write_string += f'{item[1]}, '
     write_string += "device0):\n" #add ender
     return write_string, num_of_dlpack_index, num_of_dlpack_name
 
@@ -91,28 +87,27 @@ def declare_tensor_allocation(output_index_list, array_dim_list, write_string, f
 
 #primary code generation function
 def generate_pybind_code(all_string):
-    string_dict = {0: 'graph', 2: 'op', 3: 'reverse', 5: 'norm'}
     function_string = all_string.split(")")
     fuc_var = function_string[0].split("(")
     function_name = get_fuc_name(fuc_var)
     var_list, array_dim_list, array_index_list, output_index_list = fuc_var_class(fuc_var)
     
     output_list = get_arguments(var_list, array_dim_list, output_index_list, array_index_list) #get func arguments
-    write_string, num_of_dlpack_index, num_of_dlpack_name = make_function_header(function_name, output_list, string_dict) #make header for func
+    write_string, num_of_dlpack_index, num_of_dlpack_name = make_function_header(function_name, output_list) #make header for func
     write_string = add_dlpack(num_of_dlpack_index, num_of_dlpack_name, write_string) #add dlpack and device lines
     write_string = declare_tensor_allocation(output_index_list, array_dim_list, write_string, function_name) #declare the tensor allocation
     
     flag = 0
     output_tracker = 1 #if len(output_index_list) > 1 else ""
     for (i, item) in enumerate(output_list):
-        if item[0] in string_dict:
-            write_string += f'{string_dict[item[0]]}, '
-        elif item[0] == 1:
+        if item[0] == 1:
             write_string += num_of_dlpack_name[flag] + "_dl, "
             flag += 1
         elif item[0] == 4:
             write_string += f"res_dl{output_tracker}, "
             output_tracker = output_tracker+1 #"" if len(output_index_list) == 1 else output_tracker+1
+        else :
+            write_string += f'{item[1]}, '
     
     if len(output_index_list) == 1:
         write_string = f'{write_string[:-2]})\n{INDENTATION}return res\n'
