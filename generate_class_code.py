@@ -106,7 +106,7 @@ def generate_class_code(line_string):
     var_list, array_dim_list, array_index_list, output_index_list = fuc_var_class(fuc_var)
     output_list = get_arguments(var_list, array_dim_list, output_index_list, array_index_list) #get func arguments
     
-    write_string = f'class {function_name}_api(th.autograd.Function):\n'
+    write_string = f'class {function_name}_impl(th.autograd.Function):\n'
     write_string += make_forward_method(output_list, function_name) + '\n'
     write_string += make_backward_method(output_list) + '\n'
     
@@ -121,7 +121,7 @@ def generate_wrapper_function(line_string):
     output_list = get_arguments(var_list, array_dim_list, output_index_list, array_index_list) #get func arguments
     
     write_string = f'def {function_name}({make_arguments(output_list)}):\n'
-    write_string += f'{INDENTATION}return {function_name}_api.apply({make_arguments(output_list)})\n'
+    write_string += f'{INDENTATION}return {function_name}_impl.apply({make_arguments(output_list)})\n'
     
     return write_string
 
