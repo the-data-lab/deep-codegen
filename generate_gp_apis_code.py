@@ -54,6 +54,7 @@ def get_arguments(var_list, array_dim_list, output_index_list, array_index_list)
 #get the function header (ie, `def` plus the name and the arguments)
 def make_function_header(function_name, output_list):
     write_string = f'def gp_{function_name}('
+    id = 1 #if len(output_index_list) == 1 else str(id+1)
     num_of_dlpack_index = []
     num_of_dlpack_name = []
     for (j, item) in enumerate(output_list):
@@ -62,8 +63,9 @@ def make_function_header(function_name, output_list):
             num_of_dlpack_name.append(item[1])
             write_string += f'{item[1]}, '
         elif (item[0] == 4) and (item[2] in range(1, 5)):
-            id = item[1].replace("output", "")
+            #id = item[1].replace("output", "")
             write_string += ', '.join(f'dim{id}_{i}' for i in range(item[2])) + ', '
+            id = id + 1
         else :
             write_string += f'{item[1]}, '
     write_string += "device0):\n" #add ender
@@ -109,10 +111,10 @@ def generate_pybind_code(all_string):
         else :
             write_string += f'{item[1]}, '
     
-    if len(output_index_list) == 1:
-        write_string = f'{write_string[:-2]})\n{INDENTATION}return res\n'
-    else:
-        write_string = f'{write_string[:-2]})\n{INDENTATION}return {", ".join(f"res{i+1}" for (i, _) in enumerate(output_index_list))}\n'
+    #if len(output_index_list) == 1:
+    #    write_string = f'{write_string[:-2]})\n{INDENTATION}return res\n'
+    #else:
+    write_string = f'{write_string[:-2]})\n{INDENTATION}return {", ".join(f"res{i+1}" for (i, _) in enumerate(output_index_list))}\n'
     return write_string
 
 def generate_binding_file(input_file, output_file):

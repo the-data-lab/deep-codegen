@@ -19,7 +19,7 @@ For the front-end code for TensorFlow, we generate the following files (less tes
 
 
 The `kernel.dsl` file should contain one line for each kernel API the user wishes to implement. These lines should be formatted as C/C++ function declarations and end with a semicolon. The return type should be `void`. 
-There can be multiple input tensors in a kernel, each should contain the string `input` somewhere in the argument's name. Each input tensor should be of the type `array{$x}d_t<float>&`, where `{$x}` is the dimension of the input. After the input tensor arguments, the output tensor arguments should be added, which also relies on `array{$x}d_t<float>&` class type. The output should be called `output` if there is only one, and they should be named `output1`, `output2`, `output3`, etc. if there is more than one output. If there are multiple outputs, the Python APIs will return multiple values, one for each output.
+There can be multiple input tensors in a kernel. Each input tensor should be of the type `array{$x}d_t<float>&`, where `{$x}` is the dimension of the input. After the input tensor arguments, the output tensor arguments should be added, which also relies on `array{$x}d_t<float>&` class type. The output should be called `output` if there is only one, and they should be named `output1`, `output2`, `output3`, etc. if there is more than one output. If there are multiple outputs, the Python APIs will return multiple values, one for each output.
 
 The generator supports any custom class, such as a blind class `graph_t`, and can be used in the kernel API specification. Other built in data-types are supported as well.
 
@@ -56,6 +56,3 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 For calling the actual APIs that you have implemented as part of the class assignment, we will be testing the same APIs but now using PyTorch and Python.
 You can call any of the APIs that you generated, or you can call PyTorch APIs, there is no difference.
-~                                                                                                                                                                                                     
-~                                                                                                                                                                                                     
-~                   

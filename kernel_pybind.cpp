@@ -77,7 +77,7 @@ array4d_t<float> capsule_to_array4d(py::capsule& capsule)
 
 PYBIND11_MODULE(graphpy, m) {
     
-    py::enum_<op_t>(m, "op_t", py::arithmetic(), "Operations Enums")
+  py::enum_<op_t>(m, "op_t", py::arithmetic(), "Operations Enums")
         .value("eSUM", eSUM, "sum")
         .value("eMAX", eMAX, "max")
         .value("eMIN", eMIN, "min")
